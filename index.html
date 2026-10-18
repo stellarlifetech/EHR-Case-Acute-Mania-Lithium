@@ -612,8 +612,9 @@ const GRADEBOOK_URL = "https://claude.ai/artifact/P7CbZhqJgg6Zp929cUEqpj";
 const EXTRA_INSTRUCTORS = [];     // other instructors listed for students: { name, email }
 const MAIN_INSTRUCTOR = "stellarlifetech@gmail.com";
 const MAIN_INSTRUCTOR_NAME = "Dr. Joannes Paulus Tolentino Hernandez";
-const MAIN_LOGIN = "jphernandezrn@gmail.com";   // shown sign-in email for the main instructor; the internal main email also works
-const loginKey = e => { const x = String(e||"").trim().toLowerCase(); return (x===MAIN_LOGIN || x===MAIN_INSTRUCTOR) ? MAIN_INSTRUCTOR : x; };
+const MAIN_LOGIN = "stellarlifetech@gmail.com";   // main instructor email shown in the gradebook
+const MAIN_ALIAS = "jphernandezrn@gmail.com";   // also accepted for the main instructor sign-in
+const loginKey = e => { const x = String(e||"").trim().toLowerCase(); return (x===MAIN_LOGIN || x===MAIN_ALIAS || x===MAIN_INSTRUCTOR) ? MAIN_INSTRUCTOR : x; };
 const shownEmail = e => String(e||"").trim().toLowerCase()===MAIN_INSTRUCTOR ? MAIN_LOGIN : e;
 function withMain(list){ return [{ name:MAIN_INSTRUCTOR_NAME, email:MAIN_INSTRUCTOR }, ...EXTRA_INSTRUCTORS, ...(list||[]).filter(d=>normEmail(d.email)!==MAIN_INSTRUCTOR)]; }
 let directory = [{ name:"Dr. Joannes Paulus Tolentino Hernandez", email:"stellarlifetech@gmail.com" }]; // registered instructors; main is always listed
@@ -1771,7 +1772,7 @@ function drawInstructorsPw(){
   <form id="cf" class="lockpanel" novalidate>${pwFields("c1","c2")}<div class="err" id="cErr" role="alert"></div><div class="actions"><button class="btn ghost" type="submit">Change password</button></div></form>`;
   const af = $("#af"); if(af) af.onsubmit = async e => { e.preventDefault(); const name=$("#an").value.trim(), em=normEmail($("#ae").value), pw=$("#ap").value;
     if(!name){ $("#aErr").textContent="Enter the instructor's name."; return; } if(!validEmail(em)){ $("#aErr").textContent="Enter a valid email address."; return; }
-    if(em===MAIN_LOGIN || em===MAIN_INSTRUCTOR || accounts.some(a=>a.email===em)){ $("#aErr").textContent="That email already has an instructor account."; return; } if(pw.length<10){ $("#aErr").textContent="Use a temporary password of at least 10 characters."; return; }
+    if(em===MAIN_LOGIN || em===MAIN_ALIAS || em===MAIN_INSTRUCTOR || accounts.some(a=>a.email===em)){ $("#aErr").textContent="That email already has an instructor account."; return; } if(pw.length<10){ $("#aErr").textContent="Use a temporary password of at least 10 characters."; return; }
     try{ await loadAccounts(); if(!canAddInstructors()){ $("#aErr").textContent="Your role can't add instructors. Ask the main instructor."; drawInstructors(); return; } if(accounts.some(a=>a.email===em)){ $("#aErr").textContent="That email already has an instructor account."; return; }
       const acc = { email:em, name, main:false, admin:false, addedBy:session.email, addedAt:new Date().toISOString() }; await setPassword(acc, pw, true); accounts.push(acc); await saveAccounts(); drawInstructors(); renderGradebook(); }
     catch(err){ $("#aErr").textContent="Couldn't add the instructor."; } };
