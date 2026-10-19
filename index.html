@@ -1661,9 +1661,9 @@ async function renderInstructorPw(){
   if(!main){
     page("Set up the main instructor account", "This account can see every student and manage instructors.", `<form id="mf" class="lockpanel" novalidate>
       <label for="mn" class="flabel">Main instructor name</label><input id="mn" type="text" value="${esc(MAIN_INSTRUCTOR_NAME)}" readonly>
-      <label for="me2" class="flabel">Main instructor email</label><input id="me2" type="email" value="${esc(MAIN_LOGIN)}" readonly>
+      <label for="me2" class="flabel">Main instructor email</label><input id="me2" type="email" autocomplete="username" placeholder="Email">
       ${pwFields("p1","p2")}<div class="err" id="mErr" role="alert"></div><div class="actions"><button class="btn" type="submit">Create account and open gradebook</button></div></form>`);
-    $("#mf").onsubmit = async e => { e.preventDefault(); const name=$("#mn").value.trim(), p1=$("#p1").value, p2=$("#p2").value;
+    $("#mf").onsubmit = async e => { e.preventDefault(); const name=$("#mn").value.trim(), p1=$("#p1").value, p2=$("#p2").value; if(loginKey($("#me2").value)!==MAIN_INSTRUCTOR){ $("#mErr").textContent="Enter the main instructor email."; return; }
       if(!name){ $("#mErr").textContent="Enter your name."; return; } if(p1.length<10){ $("#mErr").textContent="Use at least 10 characters."; return; } if(p1!==p2){ $("#mErr").textContent="The passwords don't match."; return; }
       try{ await loadAccounts(); const old = accounts.find(a=>a.main) || {}; const acc = { ...old, email:MAIN_INSTRUCTOR, name, main:true, addedBy:MAIN_INSTRUCTOR, addedAt:old.addedAt||new Date().toISOString() }; await setPassword(acc, p1, false); const code = await setRecovery(acc); accounts = [acc, ...accounts.filter(a=>!a.main)]; await saveAccounts(); session = { email:MAIN_INSTRUCTOR, name, isMain:true }; showRecovery(acc, code, renderGradebook); }
       catch(err){ $("#mErr").textContent = "Couldn't save the account. Make sure you have Editor access."; } };
